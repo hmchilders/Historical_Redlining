@@ -37,10 +37,10 @@ which census block groups are above the 95th percentile of national
 values for wastewater discharge by adding a centroid. (10 points)
 
 ```{r }
-LA <- santa_barbara <- ejscreen %>%
+LA <- ejscreen %>%
   filter(CNTY_NAME %in% c("Los Angeles County"))
 LA_95 <- LA %>% 
-  filter(P_PWDIS >= 95)
+  filter(P_PWDIS > 95)
 
 tm_shape(LA)+
   tm_fill(fill = 'P_PWDIS',
@@ -49,7 +49,7 @@ tm_shape(LA)+
   tm_shape(LA_95)+
   tm_symbols(size = 0.1,
              col = "red")+
-  tm_title(text = 'Los Angeles')
+  tm_graticules()
   
 ```
 
@@ -94,7 +94,9 @@ points)
 ```{r }
   tm_shape(LA_redlining)+
   tm_polygons('holc_grade',
-          palette = c("chartreuse", "darkturquoise", "gold1", "firebrick2" ))
+          palette = c("chartreuse", "darkturquoise", "gold1", "firebrick2") )+
+    tm_fill(legend. )
+            tm_graticules()
 
 ```
 
@@ -106,7 +108,7 @@ grades hint: make sure the CRS match (15 points)
 #st_crs(LA)
 #st_crs(LA_redlining)
 
-#class(LA_redlining)
+class(LA_redlining)
 LA_transform <- st_transform(LA_redlining, crs = 3857)
 st_crs(LA_transform)
 
@@ -126,6 +128,7 @@ nrow(LA_transform)
 
 Summ_stats <- joined_mapping %>%
   st_drop_geometry() %>% 
+  group_by(holc_grade) %>% 
   summarize(avg_pct_LowIncome = mean(LOWINCPCT, na.rm = TRUE),
             avg_pctl_PM25 = mean(P_PM25, na.rm = TRUE),
             avg_pctl_LifeExpt = mean(P_LIFEEXPPCT, na.rm = TRUE),
@@ -147,7 +150,6 @@ have the same CRS as redlining data. (20 points)
 ```{r}
 bird_data <- st_read("~/Documents/MEDS/Courses/EDS223/Assignment2/assignment-2-hmchilders/data/gbif-birds-LA/")
 
-st_crs(birds)
 
 ```
 
@@ -164,10 +166,13 @@ grade_pct <- joined_birds %>%
   summarize(obsv_pct = ((n()/nrow(joined_birds))*100))
 
 ggplot(grade_pct, aes(x = holc_grade, y = obsv_pct))+
-  geom_col()
+  geom_col(fill = c("chartreuse", "darkturquoise", "gold1", "firebrick2"))+
+  labs(x = "HOLC Grades",
+       y = "Precent of observation")
 ```
 
 ```{r}
+#optional graph
 id_pct <-joined_birds %>% 
   group_by(holc_id) %>% 
   summarize(obs_pct = ((n()/nrow(joined_birds))*100))
