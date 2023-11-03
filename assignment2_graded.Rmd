@@ -1,0 +1,232 @@
+---
+title: 'EDS 223: assignment 2'
+author: "{student name and collaborators}"
+output: html_document
+date: "2023-10-17"
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(include = TRUE, message = FALSE, warning = FALSE)
+```
+
+## Assignment
+
+### Investigate the legacy of redlining in current environmental (in)justice
+
+**Load relevant packages.**
+
+```{r }
+library(tidyverse)
+library(sf)
+library(tmap)
+library(tmaptools)
+library(leaflet)
+library(gt)
+```
+
+**Read in EJScreen data and filter to Los Angeles County (5 points)**
+
+```{r }
+ejscreen <- st_read("~/Documents/MEDS/Courses/EDS223/Assignment2/assignment-2-hmchilders/data/EJSCREEN_2023_BG_StatePct_with_AS_CNMI_GU_VI.gdb/")
+```
+
+**Make a map of wastewater discharge by census block groups. Indicate
+which census block groups are above the 95th percentile of national
+values for wastewater discharge by adding a centroid. (10 points)**
+
+```{r }
+LA <- ejscreen %>%
+  filter(CNTY_NAME %in% c("Los Angeles County"))
+LA_95 <- LA %>% 
+  filter(P_PWDIS > 95)
+
+cropped_LA = LA %>% 
+  drop_na()
+
+tm_shape(cropped_LA)+
+  tm_graticules()+
+    tm_scale_bar(position = c("left", "bottom"))+
+  tm_fill(fill = 'P_PWDIS',
+          fill.scale = tm_scale(breaks = c(0,20,40,60,80,90,95,100)),
+          fill.legend = tm_legend(title = 'Percentiles'))+
+  tm_shape(LA_95)+
+  tm_symbols(size = 0.1,
+             col = "red")
+  
+```
+
+The red centroids represent the 95th percentile census block groups.
+
+**Find the percent of census block groups that have:\
+- less than 5% of the population is considered low income (5 points)**
+
+```{r }
+top_5_income <- LA %>% 
+  filter(LOWINCPCT < 0.05)
+
+pct_top <- (length(top_5_income$LOWINCPCT)/length(LA$LOWINCPCT))*100
+pct_top
+
+
+```
+
+6.11% of the census block groups have less that 5% of the population
+considered low income.
+
+**Find the percent of census block groups that are:\
+- above the 80th percentile for Particulate Matter 2.5 AND\
+- above the 80th percentile for Superfund proximity (10 points)**
+
+```{r }
+pctl_80 <- LA %>% 
+  filter(P_PM25 > 80 & P_PNPL > 80)
+
+pct_above_80 <- (nrow(pctl_80)/nrow(LA))*100
+
+pct_above_80
+
+```
+
+17.35% of census block groups are above the 80th percentile for both PM
+2.5 and Superfund proximity.
+
+**Import redlining information for Los Angeles.**
+
+```{r }
+LA_redlining <- st_read("https://dsl.richmond.edu/panorama/redlining/static/downloads/geojson/CALosAngeles1939.geojson") %>%
+  st_make_valid()
+
+```
+
+**Make a map of historical redlining boundaries, colored by HOLC grade.
+(5 points)**
+
+```{r }
+  tm_shape(LA_redlining)+
+  tm_graticules()+
+    tm_scale_bar()+
+  tm_polygons('holc_grade',
+          palette = c("chartreuse", "darkturquoise", "gold1", "firebrick2"))
+            
+
+```
+
+**Find the number of census block groups that fall within areas with
+HOLC grades hint: make sure the CRS match (15 points)**
+
+**-2 did not remove duplicates from census blocks**
+
+```{r eval=FALSE}
+#Check the crs matching using the commented out code as shown below:
+#st_scr(data 1) == st_crs(data 2)
+
+LA_transform <- st_transform(LA_redlining, crs = 3857)
+
+joined_mapping <- st_intersection(LA_transform, LA)
+
+nrow(joined_mapping)
+```
+
+The number of census block groups that fall within HOLC grade areas is
+6090.
+
+**Summarize current conditions based on EJScreen data within historical
+redlining categories using the mean of the following variables:\
+-% low income.\
+- percentile for particulate Matter 2.5.\
+- percentile for low life expectancy.\
+- percentile for air toxics cancer risk (20 points)**
+
+```{r }
+LA_transform <- st_transform(LA_redlining, crs = 3857)
+joined_mapping <- st_intersection(LA_transform, LA)
+Summ_stats <- joined_mapping %>%
+  st_drop_geometry() %>% 
+  group_by(holc_grade) %>% 
+  summarize(avg_pct_LowIncome = mean(LOWINCPCT, na.rm = TRUE),
+            avg_pctl_PM25 = mean(P_PM25, na.rm = TRUE),
+            avg_pctl_LifeExpt = mean(P_LIFEEXPPCT, na.rm = TRUE),
+            avg_pctl_Cancer = mean(P_CANCER, na.rm = TRUE)) %>%
+  gt()
+
+Summ_stats
+
+
+```
+
+**Please write 2-3 sentences reflecting on these results. (5 points)**
+
+Breaking the percentiles down into each HOLC grade shows some troubling
+statistics about the quality of life differences between grades. For the
+percent of the population considered low income, the percent in HOLC
+grade A communities is only 15%. For D grade communities in the same
+category, the percentage jumps to almost 40%. This trend is true for all
+of the categories explored in this table including the average
+percentile for PM2.5 concentration, the average percentile for low life
+expectancy, and average percentile for cancer risk. Average PM2.5
+concentration and average percentile for cancer risk have the smallest
+differences between A and D groups. This data implies that policy
+decisions are affecting the "safety ratings" for the HOLC grades, and
+disadvantaged groups are being targeted.
+
+### Investigate the legacy of redlining in biodiversity observations
+
+**For bird observations from 2022 that fall within neighborhoods with
+HOLC grades, find the percent of observations within each redlining
+categories and plot results. hint: make sure that the bird observations
+have the same CRS as redlining data. (20 points)**
+
+```{r}
+bird_data <- st_read("~/Documents/MEDS/Courses/EDS223/Assignment2/assignment-2-hmchilders/data/gbif-birds-LA/")
+
+
+```
+
+```{r}
+birds <- bird_data %>% 
+  filter(year == "2022")
+
+st_crs(birds) == st_crs(LA_redlining)
+joined_birds <- st_join(LA_redlining,birds)
+```
+
+```{r}
+grade_pct <- joined_birds %>% 
+  group_by(holc_grade) %>% 
+  summarize(obsv_pct = ((n()/nrow(joined_birds))*100))
+
+ggplot(grade_pct, aes(x = holc_grade, y = obsv_pct))+
+  geom_col(fill = c("chartreuse", "darkturquoise", "gold1", "firebrick2"))+
+  labs(x = "HOLC Grades",
+       y = "Precent of observation")
+```
+
+**Please write 2-3 sentences reflecting on these results. Are they
+surprising? If so, why? What are some potential implications? (5
+points)**
+
+These results are not what I would've initially expected. I woud've
+expected the majority of the observations to be in A and B grades
+because the areas are better protected which would encourage bird
+populations, and the people living in these areas are more affluent and
+are more likely to spend time bird watching. One reason there might be a
+higher percentage of sightings in the C and D grade communities is
+because people living in these areas are more likely to core about the
+quality of their environment because they are experiencing the effects
+of increased PM and exposure to toxins.
+
+```{r}
+#optional graph
+id_pct <-joined_birds %>% 
+  group_by(holc_id) %>% 
+  summarize(obs_pct = ((n()/nrow(joined_birds))*100))
+
+tm_shape(LA_redlining)+
+  tm_fill('holc_grade', 
+          palette = c("chartreuse", "darkturquoise", "gold1", "firebrick2" ))+
+  tm_shape(id_pct)+
+  tm_symbols('obs_pct')
+```
