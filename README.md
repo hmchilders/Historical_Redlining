@@ -51,8 +51,15 @@ EDS223-assignment2
 │   Rmd/Proj files    
 │
 └───data
+    │
+    └───ejscreen
     │   column descriptions: EJSCREEN_2023_BG_Columns.xlsx
     │   metadata explation: ejscreen-tech-doc-version-2-2.pdf
     │   spatial data: EJSCREEN_2023_BG_StatePct_with_AS_CNMI_GU_VI.gdb
+    │
+    └───gbif-birds-LA
     |   biodiversity data: gbif-birds-LA/gbif-birds-LA.shp
+    │
+    └───mapping-inequality
+    |    mapping-inequality-los-angeles.json
 ```
