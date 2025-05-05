@@ -10,7 +10,7 @@ A recent study found that redlining has not only affected the environments commu
 
 ### EJScreen
 
-Data file: ejscreen/EJSCREEN_2023_BG_StatePct_with_AS_CNMI_GU_VI.gdb
+Data file: `ejscreen/EJSCREEN_2023_BG_StatePct_with_AS_CNMI_GU_VI.gdb`
 
 We will be working with data from the United States Environmental Protection Agency’s EJScreen: Environmental Justice Screening and Mapping Tool.
 
@@ -22,14 +22,14 @@ EPA is sharing EJScreen with the public:- to be more transparent about how we co
 
 EJScreen provides on environmental and demographic information for the US at the Census tract and block group levels. We will be working with data at the block group level that has been downloaded from the EPA site. To understand the associated data columns, we will need to explore the following in the data folder:
 
-Technical documentation: ejscreen-tech-doc-version-2-2.pdf
+Technical documentation: `ejscreen-tech-doc-version-2-2.pdf`
 
 Column descriptions: `EJSCREEN_2023_BG_Columns.xlsx`
 
 
 ### HOLC Redlining
 
-Data file: mapping-inequality/mapping-inequality-los-angeles.json
+Data file: `mapping-inequality/mapping-inequality-los-angeles.json`
 
 A team of researchers, led by the Digital Scholarship Lab at the University of Richmond have digitized maps and information from the HOLC as part of the Mapping Inequality project.
 
@@ -37,7 +37,7 @@ We will be working with maps of HOLC grade designations for Los Angeles.
 
 ### Biodiversity observations
 
-Data file: gbif-birds-LA.shp
+Data file: `gbif-birds-LA.shp`
 
 The Global Biodiversity Information Facility is the largest aggregator of biodiversity observations in the world. Observations typically include a location and date that a species was observed.
 
