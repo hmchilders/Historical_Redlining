@@ -43,7 +43,7 @@ The Global Biodiversity Information Facility is the largest aggregator of biodiv
 
 We will be working observations of birds from 2021 onward.
 
-**Note:** the data associated with this assignment is too large to include in the GitHub repo. Instead, download data from [here](https://drive.google.com/file/d/1lcazRbNSmP8Vj9sH1AIJcO4D1d_ulJij/view?usp=share_link). Unzip the folder and all the contents and store in your directory as follows. Don't include data when you submit your assignment!
+**Note:** the data associated with this assignment is too large to include in the GitHub repo. Instead, download data from [here](https://drive.google.com/file/d/14CauXFZkVh_6z2Euq0m1Sq1kHQ31fiMk/view?usp=sharing). Unzip the folder and all the contents and store in your directory as follows. Don't include data when you submit your assignment!
 
 ```         
 EDS223-assignment2
